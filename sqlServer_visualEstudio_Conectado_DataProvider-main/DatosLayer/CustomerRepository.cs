@@ -10,74 +10,66 @@ namespace DatosLayer
 {
     public class CustomerRepository
     {
-        
-        public List<Customers> ObtenerTodos() {
-            using (var conexion= DataBase.GetSqlConnection()) {
-                String selectFrom = "";
-                selectFrom = selectFrom + "SELECT [CustomerID] " + "\n";
-                selectFrom = selectFrom + "      ,[CompanyName] " + "\n";
-                selectFrom = selectFrom + "      ,[ContactName] " + "\n";
-                selectFrom = selectFrom + "      ,[ContactTitle] " + "\n";
-                selectFrom = selectFrom + "      ,[Address] " + "\n";
-                selectFrom = selectFrom + "      ,[City] " + "\n";
-                selectFrom = selectFrom + "      ,[Region] " + "\n";
-                selectFrom = selectFrom + "      ,[PostalCode] " + "\n";
-                selectFrom = selectFrom + "      ,[Country] " + "\n";
-                selectFrom = selectFrom + "      ,[Phone] " + "\n";
-                selectFrom = selectFrom + "      ,[Fax] " + "\n";
-                selectFrom = selectFrom + "  FROM [dbo].[Customers]";
+        // Método para obtener todos los clientes desde la base de datos.
+        public List<Customers> ObtenerTodos()
+        {
+            using (var conexion = DataBase.GetSqlConnection())
+            {
 
-                using (SqlCommand comando = new SqlCommand(selectFrom, conexion)) {
+                // Cadena SQL que selecciona todos los campos de la tabla Customers.
+                String selectFrom = "";
+                selectFrom += "SELECT [CustomerID], [CompanyName], [ContactName], [ContactTitle], [Address], [City], [Region], [PostalCode], [Country], [Phone], [Fax] " + "\n";
+                selectFrom += "  FROM [dbo].[Customers]";
+
+                // Ejecuta la consulta y obtiene los resultados.
+                using (SqlCommand comando = new SqlCommand(selectFrom, conexion))
+                {
                     SqlDataReader reader = comando.ExecuteReader();
                     List<Customers> Customers = new List<Customers>();
 
+                    // Recorre los resultados y los convierte en objetos de tipo Customers.
                     while (reader.Read())
                     {
                         var customers = LeerDelDataReader(reader);
                         Customers.Add(customers);
                     }
-                    return Customers;
+                    return Customers; // Retorna la lista de clientes.
                 }
             }
-           
         }
-        public Customers ObtenerPorID(string id) {
 
-            using (var conexion = DataBase.GetSqlConnection()) {
-                
+        // Método para obtener un cliente específico por su ID.
+        public Customers ObtenerPorID(string id)
+        {
+            using (var conexion = DataBase.GetSqlConnection())
+            {
+
+                // Cadena SQL que selecciona un cliente específico por su ID.
                 String selectForID = "";
-                selectForID = selectForID + "SELECT [CustomerID] " + "\n";
-                selectForID = selectForID + "      ,[CompanyName] " + "\n";
-                selectForID = selectForID + "      ,[ContactName] " + "\n";
-                selectForID = selectForID + "      ,[ContactTitle] " + "\n";
-                selectForID = selectForID + "      ,[Address] " + "\n";
-                selectForID = selectForID + "      ,[City] " + "\n";
-                selectForID = selectForID + "      ,[Region] " + "\n";
-                selectForID = selectForID + "      ,[PostalCode] " + "\n";
-                selectForID = selectForID + "      ,[Country] " + "\n";
-                selectForID = selectForID + "      ,[Phone] " + "\n";
-                selectForID = selectForID + "      ,[Fax] " + "\n";
-                selectForID = selectForID + "  FROM [dbo].[Customers] " + "\n";
-                selectForID = selectForID + $"  Where CustomerID = @customerId";
+                selectForID += "SELECT [CustomerID], [CompanyName], [ContactName], [ContactTitle], [Address], [City], [Region], [PostalCode], [Country], [Phone], [Fax] " + "\n";
+                selectForID += "  FROM [dbo].[Customers] " + "\n";
+                selectForID += "  WHERE CustomerID = @customerId";
 
+                // Ejecuta la consulta para el cliente con el ID proporcionado.
                 using (SqlCommand comando = new SqlCommand(selectForID, conexion))
                 {
                     comando.Parameters.AddWithValue("customerId", id);
-
-
                     var reader = comando.ExecuteReader();
                     Customers customers = null;
-                    //validadmos 
-                    if (reader.Read()) {
+
+                    // Si encuentra el cliente, lo convierte en un objeto Customers.
+                    if (reader.Read())
+                    {
                         customers = LeerDelDataReader(reader);
                     }
-                    return customers;
+                    return customers; // Retorna el cliente encontrado o null si no existe.
                 }
-
             }
         }
-        public Customers LeerDelDataReader( SqlDataReader reader) {
-          
+
+        // Método que convierte un registro del DataReader en un objeto Customers.
+        public Customers LeerDelDataReader(SqlDataReader reader)
+        {
             Customers customers = new Customers();
             customers.CustomerID = reader["CustomerID"] == DBNull.Value ? " " : (String)reader["CustomerID"];
             customers.CompanyName = reader["CompanyName"] == DBNull.Value ? "" : (String)reader["CompanyName"];
@@ -90,77 +82,79 @@ namespace DatosLayer
             customers.Country = reader["Country"] == DBNull.Value ? "" : (String)reader["Country"];
             customers.Phone = reader["Phone"] == DBNull.Value ? "" : (String)reader["Phone"];
             customers.Fax = reader["Fax"] == DBNull.Value ? "" : (String)reader["Fax"];
-            return customers;
+            return customers; // Retorna el objeto Customers creado a partir del registro leído.
         }
-        //-------------
-        public int InsertarCliente(Customers customer) {
-            using (var conexion = DataBase.GetSqlConnection()) {
+
+        // Método para insertar un nuevo cliente en la base de datos.
+        public int InsertarCliente(Customers customer)
+        {
+            using (var conexion = DataBase.GetSqlConnection())
+            {
+                // Cadena SQL que inserta un nuevo registro en la tabla Customers.
                 String insertInto = "";
-                insertInto = insertInto + "INSERT INTO [dbo].[Customers] " + "\n";
-                insertInto = insertInto + "           ([CustomerID] " + "\n";
-                insertInto = insertInto + "           ,[CompanyName] " + "\n";
-                insertInto = insertInto + "           ,[ContactName] " + "\n";
-                insertInto = insertInto + "           ,[ContactTitle] " + "\n";
-                insertInto = insertInto + "           ,[Address] " + "\n";
-                insertInto = insertInto + "           ,[City]) " + "\n";
-                insertInto = insertInto + "     VALUES " + "\n";
-                insertInto = insertInto + "           (@CustomerID " + "\n";
-                insertInto = insertInto + "           ,@CompanyName " + "\n";
-                insertInto = insertInto + "           ,@ContactName " + "\n";
-                insertInto = insertInto + "           ,@ContactTitle " + "\n";
-                insertInto = insertInto + "           ,@Address " + "\n";
-                insertInto = insertInto + "           ,@City)";
+                insertInto += "INSERT INTO [dbo].[Customers] ([CustomerID], [CompanyName], [ContactName], [ContactTitle], [Address], [City]) " + "\n";
+                insertInto += "     VALUES (@CustomerID, @CompanyName, @ContactName, @ContactTitle, @Address, @City)";
 
-                using (var comando = new SqlCommand( insertInto,conexion )) {
-                  int  insertados = parametrosCliente(customer, comando);
-                    return insertados;
+                // Ejecuta el comando de inserción.
+                using (var comando = new SqlCommand(insertInto, conexion))
+                {
+                    int insertados = parametrosCliente(customer, comando);
+                    return insertados; // Retorna el número de registros insertados.
                 }
-
             }
         }
-        //-------------
-        public int ActualizarCliente(Customers customer) {
-            using (var conexion = DataBase.GetSqlConnection()) {
+
+        // Método para actualizar un cliente existente en la base de datos.
+        public int ActualizarCliente(Customers customer)
+        {
+            using (var conexion = DataBase.GetSqlConnection())
+            {
+                // Cadena SQL que actualiza un registro existente en la tabla Customers.
                 String ActualizarCustomerPorID = "";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "UPDATE [dbo].[Customers] " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "   SET [CustomerID] = @CustomerID " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "      ,[CompanyName] = @CompanyName " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "      ,[ContactName] = @ContactName " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "      ,[ContactTitle] = @ContactTitle " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "      ,[Address] = @Address " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + "      ,[City] = @City " + "\n";
-                ActualizarCustomerPorID = ActualizarCustomerPorID + " WHERE CustomerID= @CustomerID";
-                using (var comando = new SqlCommand(ActualizarCustomerPorID, conexion)) {
+                ActualizarCustomerPorID += "UPDATE [dbo].[Customers] " + "\n";
+                ActualizarCustomerPorID += "   SET [CustomerID] = @CustomerID, [CompanyName] = @CompanyName, [ContactName] = @ContactName, [ContactTitle] = @ContactTitle, [Address] = @Address, [City] = @City " + "\n";
+                ActualizarCustomerPorID += " WHERE CustomerID = @CustomerID";
 
+                // Ejecuta el comando de actualización.
+                using (var comando = new SqlCommand(ActualizarCustomerPorID, conexion))
+                {
                     int actualizados = parametrosCliente(customer, comando);
-
-                    return actualizados;
+                    return actualizados; // Retorna el número de registros actualizados.
                 }
-            } 
+            }
         }
 
-        public int parametrosCliente(Customers customer, SqlCommand comando) {
+        // Método auxiliar para añadir los parámetros del cliente a un SqlCommand.
+        public int parametrosCliente(Customers customer, SqlCommand comando)
+        {
             comando.Parameters.AddWithValue("CustomerID", customer.CustomerID);
             comando.Parameters.AddWithValue("CompanyName", customer.CompanyName);
             comando.Parameters.AddWithValue("ContactName", customer.ContactName);
-            comando.Parameters.AddWithValue("ContactTitle", customer.ContactName);
+            comando.Parameters.AddWithValue("ContactTitle", customer.ContactTitle);
             comando.Parameters.AddWithValue("Address", customer.Address);
             comando.Parameters.AddWithValue("City", customer.City);
             var insertados = comando.ExecuteNonQuery();
-            return insertados;
+            return insertados; // Ejecuta el comando y retorna el número de filas afectadas.
         }
 
-        public int EliminarCliente(string id) {
-            using (var conexion = DataBase.GetSqlConnection() ){
+        // Método para eliminar un cliente por su ID.
+        public int EliminarCliente(string id)
+        {
+            using (var conexion = DataBase.GetSqlConnection())
+            {
+                // Cadena SQL que elimina un registro de la tabla Customers basado en el ID.
                 String EliminarCliente = "";
-                EliminarCliente = EliminarCliente + "DELETE FROM [dbo].[Customers] " + "\n";
-                EliminarCliente = EliminarCliente + "      WHERE CustomerID = @CustomerID";
-                using (SqlCommand comando = new SqlCommand(EliminarCliente, conexion)) {
+                EliminarCliente += "DELETE FROM [dbo].[Customers] WHERE CustomerID = @CustomerID";
+
+                // Ejecuta el comando de eliminación.
+                using (SqlCommand comando = new SqlCommand(EliminarCliente, conexion))
+                {
                     comando.Parameters.AddWithValue("@CustomerID", id);
-                    int elimindos = comando.ExecuteNonQuery();
-                    return elimindos;
+                    int eliminados = comando.ExecuteNonQuery();
+                    return eliminados; // Retorna el número de registros eliminados.
                 }
             }
         }
     }
 }
+
